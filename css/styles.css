@@ -1,0 +1,30 @@
+html
+{
+      background-image: linear-gradient(to right,
+      #333333,#222222,#222222,#222222,#222222,#222222,#222222,#222222,#222222,#222222,#333333);
+}
+body{
+    color: black
+}
+
+h1{
+    text-align: center;
+    color: white
+}
+div
+{
+    background: rgba(0,0,0,0);
+    text-align: center;
+}
+
+.circle
+{
+    border:2px solid white;
+    border-radius:50%;
+    background:rgba(0,0,0,0);
+    color:white;
+    width:100px;
+    height:100px;
+    text-align:center;
+    line-height:100px;
+}
