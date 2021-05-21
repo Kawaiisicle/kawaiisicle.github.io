@@ -146,6 +146,14 @@ functions.addListener(ask,'click',function(){
     askClicked()
 })
 
+functions.addListener(input,'keyup',function(event){
+    if (event.keyCode === 13) {
+        event.preventDefault();
+        askClicked()
+    }
+        
+})
+
 functions.addListener(resetButton,'click',function()
 {
 
@@ -154,15 +162,15 @@ functions.addListener(resetButton,'click',function()
 
 function addToPx(string,number)
 {
-    current = parseInt(string.replace('px',''))
+    let current = parseInt(string.replace('px',''))
     current += number;
-    return toString(current)
+    return `${current}`
 }
 
 console.log(addToPx('100px',50))
 function shake(element)
 {
-    element
+    return 'bingus'
 }
 
 
