@@ -1,176 +1,166 @@
 import functions from './functions.js'
-import data from './data.js'
 
 
-/*
-||||||||||STYLES||||||||||
-*/
+var synth = window.speechSynthesis;
 
+var inputForm = document.querySelector('form');
+var inputTxt = document.querySelector('.txt');
+var voiceSelect = document.querySelector('select');
 
-//input container
-const inputBox = functions.createNewElement('div')
-functions.putOnPage(inputBox)
-inputBox.style.width = '500px'
-inputBox.style.height = '100px'
-inputBox.style.position = 'relative'
-inputBox.style.top = '5px'
-inputBox.style.margin = 'auto'
+var pitch = document.querySelector('#pitch');
+var pitchValue = document.querySelector('.pitch-value');
+var rate = document.querySelector('#rate');
+var rateValue = document.querySelector('.rate-value');
 
+var voices = [];
 
-//input text box
-const input = functions.createNewElement('input')
-functions.putOnPage(input,inputBox)
-input.type = 'text',input.placeholder = 'Ask me anything!'
-input.style.margin = 'auto'
+var listening = document.getElementById('listening')
+console.log(listening)
+console.log(listening.checked)
+//recognition stuff
+let stt = functions.createNewElement('div')
+functions.putOnPage(stt)
+var button = document.querySelector('Play')
 
+var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
+var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList
+var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent
 
-//input button
-const ask = functions.createNewElement('button')
-functions.putOnPage(ask,inputBox)
-functions.writeInElement(ask,'Ask!')
+var colors = ['aqua', 'azure', 'beige', 'bisque', 'black', 'blue', 'brown', 'chocolate', 'coral', 'crimson', 'cyan', 'fuchsia', 'ghostwhite', 'gold', 'goldenrod', 'gray', 'green', 'indigo', 'ivory', 'khaki', 'lavender', 'lime', 'linen', 'magenta', 'maroon', 'moccasin', 'navy', 'olive', 'orange', 'orchid', 'peru', 'pink', 'plum', 'purple', 'red', 'salmon', 'sienna', 'silver', 'snow', 'tan', 'teal', 'thistle', 'tomato', 'turquoise', 'violet', 'white', 'yellow'];
+var grammar = '#JSGF V1.0; grammar colors; public <color> = ' + colors.join(' | ') + ' ;'
 
-//asked question
-const question = functions.createNewElement('h1')
-functions.putOnPage(question,inputBox)
-functions.writeInElement(question,'')
-question.style.opacity = '0'
-question.style.margin = 'auto',question.style.color = 'white'
+var recognition = new SpeechRecognition();
+var speechRecognitionList = new SpeechGrammarList();
 
-//magic 8-ball
-const ball = functions.createNewElement('div')
-functions.putOnPage(ball,document.body)
-ball.style.width = '500px',ball.style.height='500px',ball.style.backgroundColor = 'black',ball.style.color='gray'
-ball.style.borderRadius = '50%'
-ball.style.positon = 'relative'
-ball.style.margin = 'auto'
+speechRecognitionList.addFromString(grammar, 1);
+recognition.grammars = speechRecognitionList;
+recognition.continuous = false;
+recognition.lang = 'en-US';
+recognition.interimResults = false;
+recognition.maxAlternatives = 1;
 
-//magic 8-ball window
-const ballWindow = functions.createNewElement('div')
-functions.putOnPage(ballWindow,ball)
-ballWindow.style.width = '250px',ballWindow.style.height='250px',
-ballWindow.style.backgroundColor = 
-ballWindow.style.borderRadius = '50%',ballWindow.style.border = '4px solid #444444',
-ballWindow.style.position = 'relative'
-ballWindow.style.left = '125px'
-ballWindow.style.top = '40px'
-
-//answer triangle
-const arrow = functions.createNewElement('div')
-functions.putOnPage(arrow,ballWindow)
-arrow.style.width = '00px',arrow.style.height = '0px',arrow.style.backgroundColor = 'blue',
-arrow.style.borderLeft = '80px solid black'
-arrow.style.borderRight = '80px solid black'
-arrow.style.borderBottom = '0px solid black'
-arrow.style.borderTop = '150px solid blue'
-arrow.style.position = 'relative'
-arrow.style.top = '55px',arrow.style.left = '45px'
-arrow.style.verticalAlign = 'top',arrow.style.textAlign = 'center'
-
-//answer text
-const arrowText = functions.createNewElement('div')
-functions.putOnPage(arrowText,arrow)
-arrowText.style.width = '70px',arrowText.style.height = '30px',arrowText.style.backgroundColor = 'blue',
-arrowText.style.position = 'absolute'
-arrowText.style.alignContent = 'center'
-arrowText.style.verticalAlign = 'center'
-arrowText.style.margin= 'auto'
-arrowText.style.color = 'white'
-arrowText.style.top = '-130px',arrowText.style.left = '-35px'
-
-//rest button
-const resetButton = functions.createNewElement('button')
-functions.putOnPage(resetButton,ball)
-resetButton.style.width = '100px'
-resetButton.style.height = '100px'
-resetButton.style.margin = 'auto'
-resetButton.style.position = 'relative'
-resetButton.style.left = '10px'
-resetButton.style.top = '80px'
-resetButton.style.backgroundColor = '#555555'
-resetButton.style.borderRadius = '50%'
-resetButton.innerHTML = 'RESET'
-
-/*
-||||||||||FUNCTIONS||||||||||
-*/
-
-function pickAnswer()
+const newSpeechChunk = function() 
 {
-    console.log(data.answers.length)
-    let answer = functions.getRandomInt(data.answers.length)
-    console.log(answer)
-    return data.answers[answer]
+  recognition.start();
+  console.log('Listening for mic input.');
 }
-
-function makeAnswer()
-{
-    arrowText.innerHTML = pickAnswer()
+document.body.onkeyup = function (e) {
+  if (e.keyCode == 17) {
+    newSpeechChunk();
+  }
 }
 
 
-function askClicked()
-{
-    console.log('clicked ask')
-    functions.fadeOut(arrow,1000)
-    functions.fadeOut(input,1000)
-    functions.fadeOut(ask,1000)
-    question.innerHTML = input.value;
-    functions.fadeIn(question,1000)
-    setTimeout(function()
-    {
-        console.log('faded out') 
-        functions.fadeIn(arrow,1000)
-        makeAnswer()
-    },2000)
+recognition.onresult = function (event) {
+  // The SpeechRecognitionEvent results property returns a SpeechRecognitionResultList object
+  // The SpeechRecognitionResultList object contains SpeechRecognitionResult objects.
+  // It has a getter so it can be accessed like an array
+  // The first [0] returns the SpeechRecognitionResult at the last position.
+  // Each SpeechRecognitionResult object contains SpeechRecognitionAlternative objects that contain individual results.
+  // These also have getters so they can be accessed like arrays.
+  // The second [0] returns the SpeechRecognitionAlternative at position 0.
+  // We then return the transcript property of the SpeechRecognitionAlternative object
+  document.querySelector('.txt').value = (event.results[0][0].transcript)
+  console.log('Confidence: ' + event.results[0][0].confidence);
+  speak()
+
 }
 
-function resetClicked()
-{
-    console.log('clicked reset')
-    functions.fadeOut(arrow,1000)
-    functions.fadeOut(question,1000)
-    question.innerHTML = ''
-    input.value = ''
-    functions.fadeIn(input,1000)
-    functions.fadeIn(ask,1000)
-    setTimeout(function()
-    {
-        console.log('faded out') 
-        arrowText.innerHTML = ''
-        functions.fadeIn(arrow,1000)
-},2000)
+recognition.onspeechend = function () {
+  if(!listening.checked){
+    recognition.stop()
+  }
 }
+var synth = window.speechSynthesis;
 
-functions.addListener(ask,'click',function(){
+var inputForm = document.querySelector('form');
+var inputTxt = document.querySelector('.txt');
+var voiceSelect = document.querySelector('select');
 
-    askClicked()
-})
+var pitch = document.querySelector('#pitch');
+var pitchValue = document.querySelector('.pitch-value');
+var rate = document.querySelector('#rate');
+var rateValue = document.querySelector('.rate-value');
 
-functions.addListener(input,'keyup',function(event){
-    if (event.keyCode === 13) {
-        event.preventDefault();
-        askClicked()
+var voices = [];
+
+function populateVoiceList() {
+  voices = synth.getVoices().sort(function (a, b) {
+      const aname = a.name.toUpperCase(), bname = b.name.toUpperCase();
+      if ( aname < bname ) return -1;
+      else if ( aname == bname ) return 0;
+      else return +1;
+  });
+  var selectedIndex = voiceSelect.selectedIndex < 0 ? 0 : voiceSelect.selectedIndex;
+  voiceSelect.innerHTML = '';
+  for(let i = 0; i < voices.length ; i++) {
+    var option = document.createElement('option');
+    option.textContent = voices[i].name + ' (' + voices[i].lang + ')';
+    
+    if(voices[i].default) {
+      option.textContent += ' -- DEFAULT';
     }
-        
-})
 
-functions.addListener(resetButton,'click',function()
-{
-
-    resetClicked()
-})
-
-function addToPx(string,number)
-{
-    let current = parseInt(string.replace('px',''))
-    current += number;
-    return `${current}`
+    option.setAttribute('data-lang', voices[i].lang);
+    option.setAttribute('data-name', voices[i].name);
+    voiceSelect.appendChild(option);
+  }
+  voiceSelect.selectedIndex = selectedIndex;
 }
 
-console.log(addToPx('100px',50))
-function shake(element)
-{
-    return 'bingus'
+populateVoiceList();
+if (speechSynthesis.onvoiceschanged !== undefined) {
+  speechSynthesis.onvoiceschanged = populateVoiceList;
+}
+
+function speak(){
+    if (synth.speaking) {
+        console.error('speechSynthesis.speaking');
+        return;
+    }
+    if (inputTxt.value !== '') {
+    var utterThis = new SpeechSynthesisUtterance(inputTxt.value);
+    utterThis.onend = function (event) {
+        console.log(utterThis.voice.name + " spoke: " + inputTxt.value)
+        if(listening.checked)
+        {
+          newSpeechChunk()
+        }
+    }
+    utterThis.onerror = function (event) {
+        console.error('SpeechSynthesisUtterance.onerror');
+    }
+    var selectedOption = voiceSelect.selectedOptions[0].getAttribute('data-name');
+    for(let i = 0; i < voices.length ; i++) {
+      if(voices[i].name === selectedOption) {
+        utterThis.voice = voices[i];
+        break;
+      }
+    }
+    utterThis.pitch = pitch.value;
+    utterThis.rate = rate.value;
+    synth.speak(utterThis);
+  }
+}
+
+inputForm.onsubmit = function(event) {
+  event.preventDefault();
+
+  speak();
+
+  inputTxt.blur();
+}
+
+pitch.onchange = function() {
+  pitchValue.textContent = pitch.value;
+}
+
+rate.onchange = function() {
+  rateValue.textContent = rate.value;
+}
+
+voiceSelect.onchange = function(){
+  speak();
 }
 
 
