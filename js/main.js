@@ -17,7 +17,7 @@ var voices = [];
 var listening = document.getElementById('listening')
 console.log(listening)
 console.log(listening.checked)
-//recognition stuff
+    //recognition stuff
 let stt = functions.createNewElement('div')
 functions.putOnPage(stt)
 var button = document.querySelector('Play')
@@ -34,42 +34,49 @@ var speechRecognitionList = new SpeechGrammarList();
 
 speechRecognitionList.addFromString(grammar, 1);
 recognition.grammars = speechRecognitionList;
-recognition.continuous = false;
+recognition.continuous = true;
 recognition.lang = 'en-US';
 recognition.interimResults = false;
 recognition.maxAlternatives = 1;
 
-const newSpeechChunk = function() 
-{
-  recognition.start();
-  console.log('Listening for mic input.');
+const newSpeechChunk = function() {
+    recognition.start();
+    console.warn('New speech chunk started.')
+    console.log('Listening for mic input.');
 }
-document.body.onkeyup = function (e) {
-  if (e.keyCode == 17) {
-    newSpeechChunk();
-  }
-}
-
-
-recognition.onresult = function (event) {
-  // The SpeechRecognitionEvent results property returns a SpeechRecognitionResultList object
-  // The SpeechRecognitionResultList object contains SpeechRecognitionResult objects.
-  // It has a getter so it can be accessed like an array
-  // The first [0] returns the SpeechRecognitionResult at the last position.
-  // Each SpeechRecognitionResult object contains SpeechRecognitionAlternative objects that contain individual results.
-  // These also have getters so they can be accessed like arrays.
-  // The second [0] returns the SpeechRecognitionAlternative at position 0.
-  // We then return the transcript property of the SpeechRecognitionAlternative object
-  document.querySelector('.txt').value = (event.results[0][0].transcript)
-  console.log('Confidence: ' + event.results[0][0].confidence);
-  speak()
-
+document.body.onkeyup = function(e) {
+    if (e.keyCode == 17) {
+        newSpeechChunk();
+    }
 }
 
-recognition.onspeechend = function () {
-  if(!listening.checked){
+
+recognition.onresult = function(event) {
+    // The SpeechRecognitionEvent results property returns a SpeechRecognitionResultList object
+    // The SpeechRecognitionResultList object contains SpeechRecognitionResult objects.
+    // It has a getter so it can be accessed like an array
+    // The first [0] returns the SpeechRecognitionResult at the last position.
+    // Each SpeechRecognitionResult object contains SpeechRecognitionAlternative objects that contain individual results.
+    // These also have getters so they can be accessed like arrays.
+    // The second [0] returns the SpeechRecognitionAlternative at position 0.
+    // We then return the transcript property of the SpeechRecognitionAlternative object
+    document.querySelector('.txt').value = (event.results[0][0].transcript)
+    console.log('Confidence: ' + event.results[0][0].confidence);
+    speak()
     recognition.stop()
-  }
+    newSpeechChunk()
+
+
+}
+
+recognition.onspeechend = function() {
+    console.warn("Speech recognition ended")
+    recognition.stop()
+    if (listening.checked) {
+        recognition.start()
+        console.warn('New speech chunk started.')
+        console.log('Listening for mic input.');
+    }
 }
 var synth = window.speechSynthesis;
 
@@ -85,82 +92,80 @@ var rateValue = document.querySelector('.rate-value');
 var voices = [];
 
 function populateVoiceList() {
-  voices = synth.getVoices().sort(function (a, b) {
-      const aname = a.name.toUpperCase(), bname = b.name.toUpperCase();
-      if ( aname < bname ) return -1;
-      else if ( aname == bname ) return 0;
-      else return +1;
-  });
-  var selectedIndex = voiceSelect.selectedIndex < 0 ? 0 : voiceSelect.selectedIndex;
-  voiceSelect.innerHTML = '';
-  for(let i = 0; i < voices.length ; i++) {
-    var option = document.createElement('option');
-    option.textContent = voices[i].name + ' (' + voices[i].lang + ')';
-    
-    if(voices[i].default) {
-      option.textContent += ' -- DEFAULT';
-    }
+    voices = synth.getVoices().sort(function(a, b) {
+        const aname = a.name.toUpperCase(),
+            bname = b.name.toUpperCase();
+        if (aname < bname) return -1;
+        else if (aname == bname) return 0;
+        else return +1;
+    });
+    var selectedIndex = voiceSelect.selectedIndex < 0 ? 0 : voiceSelect.selectedIndex;
+    voiceSelect.innerHTML = '';
+    for (let i = 0; i < voices.length; i++) {
+        var option = document.createElement('option');
+        option.textContent = voices[i].name + ' (' + voices[i].lang + ')';
 
-    option.setAttribute('data-lang', voices[i].lang);
-    option.setAttribute('data-name', voices[i].name);
-    voiceSelect.appendChild(option);
-  }
-  voiceSelect.selectedIndex = selectedIndex;
+        if (voices[i].default) {
+            option.textContent += ' -- DEFAULT';
+        }
+
+        option.setAttribute('data-lang', voices[i].lang);
+        option.setAttribute('data-name', voices[i].name);
+        voiceSelect.appendChild(option);
+    }
+    voiceSelect.selectedIndex = selectedIndex;
 }
 
 populateVoiceList();
 if (speechSynthesis.onvoiceschanged !== undefined) {
-  speechSynthesis.onvoiceschanged = populateVoiceList;
+    speechSynthesis.onvoiceschanged = populateVoiceList;
 }
 
-function speak(){
+function speak() {
     if (synth.speaking) {
         console.error('speechSynthesis.speaking');
         return;
     }
     if (inputTxt.value !== '') {
-    var utterThis = new SpeechSynthesisUtterance(inputTxt.value);
-    utterThis.onend = function (event) {
-        console.log(utterThis.voice.name + " spoke: " + inputTxt.value)
-        if(listening.checked)
-        {
-          newSpeechChunk()
+        var utterThis = new SpeechSynthesisUtterance(inputTxt.value);
+        utterThis.onend = function(event) {
+            console.log(utterThis.voice.name + " spoke: " + inputTxt.value)
+            if (listening.checked) {
+                newSpeechChunk()
+            }
         }
+        utterThis.onerror = function(event) {
+            console.error('SpeechSynthesisUtterance.onerror');
+        }
+        var selectedOption = voiceSelect.selectedOptions[0].getAttribute('data-name');
+        for (let i = 0; i < voices.length; i++) {
+            if (voices[i].name === selectedOption) {
+                utterThis.voice = voices[i];
+                break;
+            }
+        }
+        utterThis.pitch = pitch.value;
+        utterThis.rate = rate.value;
+        synth.speak(utterThis);
     }
-    utterThis.onerror = function (event) {
-        console.error('SpeechSynthesisUtterance.onerror');
-    }
-    var selectedOption = voiceSelect.selectedOptions[0].getAttribute('data-name');
-    for(let i = 0; i < voices.length ; i++) {
-      if(voices[i].name === selectedOption) {
-        utterThis.voice = voices[i];
-        break;
-      }
-    }
-    utterThis.pitch = pitch.value;
-    utterThis.rate = rate.value;
-    synth.speak(utterThis);
-  }
 }
 
 inputForm.onsubmit = function(event) {
-  event.preventDefault();
+    event.preventDefault();
 
-  speak();
+    speak();
 
-  inputTxt.blur();
+    inputTxt.blur();
 }
 
 pitch.onchange = function() {
-  pitchValue.textContent = pitch.value;
+    pitchValue.textContent = pitch.value;
 }
 
 rate.onchange = function() {
-  rateValue.textContent = rate.value;
+    rateValue.textContent = rate.value;
 }
 
-voiceSelect.onchange = function(){
-  speak();
+voiceSelect.onchange = function() {
+    speak();
 }
-
-
