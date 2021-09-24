@@ -50,27 +50,30 @@ document.body.onkeyup = function(e) {
     }
 }
 
-
+recognition.onaudiostart = function() {
+    console.warn('audio input started')
+}
 recognition.onresult = function(event) {
-    // The SpeechRecognitionEvent results property returns a SpeechRecognitionResultList object
-    // The SpeechRecognitionResultList object contains SpeechRecognitionResult objects.
-    // It has a getter so it can be accessed like an array
-    // The first [0] returns the SpeechRecognitionResult at the last position.
-    // Each SpeechRecognitionResult object contains SpeechRecognitionAlternative objects that contain individual results.
-    // These also have getters so they can be accessed like arrays.
-    // The second [0] returns the SpeechRecognitionAlternative at position 0.
-    // We then return the transcript property of the SpeechRecognitionAlternative object
+    console.warn(event.results[0][0].transcript)
+        // The SpeechRecognitionEvent results property returns a SpeechRecognitionResultList object
+        // The SpeechRecognitionResultList object contains SpeechRecognitionResult objects.
+        // It has a getter so it can be accessed like an array
+        // The first [0] returns the SpeechRecognitionResult at the last position.
+        // Each SpeechRecognitionResult object contains SpeechRecognitionAlternative objects that contain individual results.
+        // These also have getters so they can be accessed like arrays.
+        // The second [0] returns the SpeechRecognitionAlternative at position 0.
+        // We then return the transcript property of the SpeechRecognitionAlternative object
     document.querySelector('.txt').value = (event.results[0][0].transcript)
     console.log('Confidence: ' + event.results[0][0].confidence);
     speak()
     recognition.stop()
-    newSpeechChunk()
+    newSpeechChunk()    
 
 
 }
 
 recognition.onspeechend = function() {
-    console.warn("Speech recognition ended")
+    console.warn("recognized speech ended")
     recognition.stop()
     if (listening.checked) {
         recognition.start()
@@ -169,3 +172,5 @@ rate.onchange = function() {
 voiceSelect.onchange = function() {
     speak();
 }
+
+console.log("hello world")
